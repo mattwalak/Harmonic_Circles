@@ -10,28 +10,6 @@ const wss = new ws.Server({noServer: true});
 
 // ------------------  RESPONSE FUNCTIONS  -----------------------------
 
-function sendRequestSkyDimensionsResponse(PlayerWs){
-  msgObj = {
-    source: "Server",
-    command: "RequestSkyAspectResponse",
-    skyAspect: activeGameAspect
-  };
-
-  DesignerWs.send(JSON.stringify(msgObj));
-};
-
-function deliverFirework(msgObj){
-  if(activeGame != null){
-    msgObj.source = "Server";
-    msgObj.command = "DeliverFirework";
-    activeGame.send(JSON.stringify(msgObj));
-  }else{
-    console.log("ERROR - No active sky");
-  }
-}
-
-// ------------------  MESSAGE PROCESSING  -----------------------------
-
 function respondToNewPlayerConnected(playerWs, playerNum){
   // Response to game
   msgObj = {
@@ -57,6 +35,8 @@ function respondToPlayerConnectionFailed(playerWs){
   };
   playerWs.send(JSON.stringify(msgObj));
 }
+
+// ------------------  MESSAGE PROCESSING  -----------------------------
 
 function processPlayerMessage(msgObj, playerWs){
   switch(msgObj.command){
@@ -101,18 +81,8 @@ function processPlayerMessage(msgObj, playerWs){
       };
       player1.send(JSON.stringify(p1Message));
       break;
-
-    /*
-    case "RequestSkyAspect":
-      console.log("Designer:RequestSkyAspect");
-      sendRequestSkyDimensionsResponse(DesignerWs);
-      break;
-    case "SendFirework":
-      console.log("Designer:SendFirework");
-      deliverFirework(msgObj);
-      break;*/
     default:
-      console.log(`Designer: Unknown message = ${msg}`);
+      console.log(`Player: Unknown message = ${msg}`);
   }
 }
 
@@ -136,17 +106,8 @@ function processGameMessage(msgObj, gameWs){
       player2.send(JSON.stringify(msgObj));
       player1.send(JSON.stringify(msgObj));
       break;
-    /*
-    case "OpenNewSky":
-      console.log("Sky:OpenNewSky")
-      activeGame = SkyWs;
-      activeGameAspect = msgObj.skyAspect;
-      break;
-    case "PantsOptional":
-      console.log("Sky:PantsOptional");
-      break;*/
     default:
-      console.log(`Sky: Unknown message = ${msg}`);
+      console.log(`Game: Unknown message = ${msg}`);
   }
 }
 
