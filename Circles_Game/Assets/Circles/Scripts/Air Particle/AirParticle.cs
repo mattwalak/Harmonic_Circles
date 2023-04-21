@@ -19,21 +19,7 @@ public class AirParticle : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        rb2D.AddForce(10 * transform.right);   
-    }
-
-    void OnTriggerExit2D(Collider2D other)
-    {
-        Debug.Log("Triggered, but exiting");
-    }
-
     void SetOpacity(float a){
-        /*
-        Color col = spriteRenderer.color;
-        col.a = a;
-        col.g = 1.0f - a;*/
         Color col = Color.HSVToRGB(a, 0.8f, 1.0f);
         col.a = a;
         spriteRenderer.color = col;

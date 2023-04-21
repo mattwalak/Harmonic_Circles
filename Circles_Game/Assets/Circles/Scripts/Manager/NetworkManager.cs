@@ -91,7 +91,6 @@ public class NetworkManager : MonoBehaviour
         }else if(isNoiseGameScene){
 
         }
-        
     }
 
     // ----------------------------------- UNITY STUFF -----------------------------
