@@ -36,7 +36,6 @@ public class Stone : MonoBehaviour
         gameManager = (NoiseGameManager)FindObjectOfType<NoiseGameManager>();
         netManager = (NetworkManager)FindObjectOfType<NetworkManager>();
         osc = (OSC)FindObjectOfType<OSC>();
-        gameManager.AddStone(this);
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         UpdateColor();

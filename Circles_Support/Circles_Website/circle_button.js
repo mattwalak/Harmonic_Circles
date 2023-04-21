@@ -44,6 +44,10 @@ function CircleButton(posX, posY, diameter, id, onClickCallback){
     }
 
     this.checkClick = function(){
+        if(!this.isEnabled){
+            return;
+        }
+
         var dist = Math.sqrt(Math.pow(mouseX - this.posX, 2) + Math.pow(mouseY - this.posY, 2));
         if (dist < (this.diameter / 2)){
             this.isPressedIn = !this.isPressedIn;
@@ -54,6 +58,14 @@ function CircleButton(posX, posY, diameter, id, onClickCallback){
     this.forceDeselect = function(){
         this.isPressedIn = false;
         onClickCallback(this.id, -1);
+    }
+
+    this.disable = function(){
+        this.isEnabled = false;
+    }
+
+    this.enable = function(){
+        this.isEnabled = true;
     }
 
     this.setActive = function(state){

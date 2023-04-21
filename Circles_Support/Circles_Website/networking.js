@@ -27,9 +27,8 @@ function processServerMessage(msgObj){
       break;
     case "Player2SentKeyChange":
       console.log("Server:Player2SentKeyChange");
-      if(playerNum == 1){
-        // player 1 response to key change
-      }
+      onNetwork_Player2SentKeyChange(msgObj);
+      break;
     default:
       console.log(`Designer: Unknown command = ${msg}`);
   }

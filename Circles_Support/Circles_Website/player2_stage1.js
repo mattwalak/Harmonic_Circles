@@ -21,7 +21,6 @@ function Player2_Stage1(){
 
     this.draw = function(){
         for(let i = 0; i < circleSelectorButtons.length; i++){
-            fill(255);
             circleSelectorButtons[i].draw();
         }
     }

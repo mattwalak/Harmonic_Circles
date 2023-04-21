@@ -33,12 +33,10 @@ public class NetworkManager : MonoBehaviour
             }else{
                 switch(msgObj.command){
                     case "PlayerInputData":
-                        Debug.Log("PlayerInputData Initial Response");
                         handlers.Add(HandlePlayerInputData);
                         messages.Add(msgObj);
                         break;
                     case "CircleButtonClick":
-                        Debug.Log("CircleButtonClick Initial Response");
                         handlers.Add(HandleCircleButtonClick);
                         messages.Add(msgObj);
                         break;
@@ -78,14 +76,12 @@ public class NetworkManager : MonoBehaviour
     }
     
     public void HandleCircleButtonClick(NetworkMessage msgObj){
-        Debug.Log("Circle Button Click handler");
         if(isNoiseGameScene){
             noiseGameManager.HandleCircleButtonClick(msgObj);
         }
     }
 
     public void HandlePlayerInputData(NetworkMessage msgObj){
-        Debug.Log("Player Input Data handler");
         if(isPlayerConnectionScene){
             playerConnectionManager.HandlePlayerInputData(msgObj);
         }else if(isNoiseGameScene){

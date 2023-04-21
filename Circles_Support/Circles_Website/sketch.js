@@ -283,3 +283,9 @@ function onNetwork_SendCircleButtonUpdateFromGame(msgObj){
 function onNetwork_SceneChange(msgObj){
 	nextGameStage();
 }
+
+function onNetwork_Player2SentKeyChange(msgObj){
+	if(playerNum == 1 && gameState == 2){
+		player1stage2.unlockSource();
+	}
+}

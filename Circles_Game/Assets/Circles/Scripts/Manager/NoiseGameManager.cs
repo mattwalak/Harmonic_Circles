@@ -6,12 +6,14 @@ using TMPro;
 
 public class NoiseGameManager : MonoBehaviour
 {
-    public float scaleAdditionValue = 0.01f;
+    public Stage1_Manager stage1Manager;
+    public Stage2_Manager stage2Manager;
+    public Stage3_Manager stage3Manager;
+    
+    public int NUM_CIRCLES = 20;
+    public int NUM_KEYS = 12;
 
-    public Vector2 ballSourcePosition;
-
-    public TMP_Text circlesCounter;
-    private int circlesLeft = 20;
+    public TMP_Text progressTextCounter;
 
     public OSC osc;
     public GameObject laserCollection;
@@ -19,109 +21,91 @@ public class NoiseGameManager : MonoBehaviour
     public CircleBounds circleBounds;
 
     public GameObject airParticlePrefab;
-    public GameObject windTouchGameObject;
 
     private NetworkManager netManager;
 
-    private GameObject activeWindTouchObject;
-    private Camera mainCamera;
+    public Camera mainCamera;
 
-    // 0 = impulse mode
-    // [1, 2) = rhythmic impulse mode
-    // 2 = laser mode
-
+    // 0 = initializing
+    // 1 = impulse mode
+    // 2 = rhythmic impulse mode
+    // 3 = laser mode
     private int gameState = 0;
 
-    private const int NUM_PARTICLES_PER_CLICK = 10;
-    private const float TIME_BETWEEN_BLASTS = 0.5f;//0.15f;
-
-    private const float TIME_BETWEEN_BLASTS_MAX = 0.5f;
-    private const float TIME_BETWEEN_BLASTS_MIN = 0.03f;
-    private const float BALL_BLAST_VELOCITY_MIN = 3f;
-    private const float BALL_BLAST_VELOCITY_MAX = 8f;
-
-    private const float ROTATION_PERIOD = 500.0f;
-
-    private float blastCounter_t = 0f;
-    private float rotationTimer_t = 0f;
-
-    private float ABSOLUTE_STONE_SIZE_MAX = 1.0f;
-    private float ABSOLUTE_STONE_SIZE_MIN = 0.1f;
-    private float currentStoneMin = 0.1f;
-    private float currentStoneMax = 1.0f;
+    public const int NUM_PARTICLES_PER_CLICK = 10;
+    public const float PARTICLE_VELOCITY = 3.0f;
     
-    private List<Stone> stones;
-
     void Start(){
         mainCamera = Camera.main;
-        activeWindTouchObject = Instantiate(windTouchGameObject, transform);
-        activeWindTouchObject.SetActive(false);
 
         netManager = (NetworkManager) FindObjectOfType(typeof(NetworkManager));
         if(netManager != null){
             netManager.LoadNoiseGameScene();
         }
 
-        ballSourcePosition = new Vector2(0, 0);
+        NextScene();
     }
 
-    public void AddStone(Stone stone){
-        if(stones == null){
-            stones = new List<Stone>();
-        }
-
-        stones.Add(stone);
-    }
-
-    void blastParticlesAtLocation(Vector2 pos){
-        float rotationFrac = rotationTimer_t / ROTATION_PERIOD;
+    public void blastParticlesAtLocation(Vector2 pos){
         for(int i = 0; i < NUM_PARTICLES_PER_CLICK; i++){
-            float rad = i * (2f * Mathf.PI / NUM_PARTICLES_PER_CLICK) /*+ (2f * Mathf.PI * rotationFrac)*/;
+            float rad = i * (2f * Mathf.PI / NUM_PARTICLES_PER_CLICK);
             Vector2 dir = new Vector2(
-                Mathf.Cos(rad /*+ Random.Range(0f, 0.1f)*/), 
-                Mathf.Sin(rad /*+ Random.Range(0f, 0.1f)*/)
+                Mathf.Cos(rad), 
+                Mathf.Sin(rad)
             );
                 
             GameObject p = Instantiate(airParticlePrefab, transform);
             p.transform.position = pos;
             Rigidbody2D p2d = p.GetComponent<Rigidbody2D>();
-            p2d.velocity = dir * BALL_BLAST_VELOCITY_MIN;
+            p2d.velocity = dir * PARTICLE_VELOCITY;
         }    
     }
 
-    void blastParticlesAtMouseLocation(){
+    public void blastParticlesAtMouseLocation(){
         Vector2 mousePos = Input.mousePosition;
         Vector2 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
         blastParticlesAtLocation(worldPos);
     }
 
-    void Update(){
-        
-        blastCounter_t += Time.deltaTime;
-        rotationTimer_t += Time.deltaTime;
-
-        while(rotationTimer_t > ROTATION_PERIOD){
-            rotationTimer_t -= ROTATION_PERIOD;
+    public void NextScene(){
+        int nextGameStageTemp = gameState + 1;
+        if(nextGameStageTemp == 1){
+            stage1Manager.EnterStage();
+        }else if(nextGameStageTemp == 2){
+            stage1Manager.ExitStage();
+            stage2Manager.EnterStage();
+        }else if(nextGameStageTemp == 3){
+            stage2Manager.ExitStage();
+            stage3Manager.EnterStage();
         }
+
+        gameState = nextGameStageTemp;
+    }
+
+    public void UpdateProgressCounter(int newNumber){
+        progressTextCounter.text = newNumber.ToString();
+    }
+
+    public void SendOscMessage(OscMessage msg){
+        osc.Send(msg);
+    }
+
+    public void SendNetworkMessage(NetworkMessage msg){
+        netManager.SendMessage(msg);
+    }
+
+
+    void Update(){
+        /*
+        blastCounter_t += Time.deltaTime;
         
         if(gameState == 0){
             // Impulse mode
-            if(Input.GetMouseButtonDown(0)){
-                blastParticlesAtMouseLocation();
-            }
+            
 
         }else if(gameState == 1){
             // Rhythm mode
-            if(Input.GetMouseButton(0)){
-                Vector2 mousePos = Input.mousePosition;
-                Vector2 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
-                ballSourcePosition = worldPos;
-            }
-
-            while(blastCounter_t > TIME_BETWEEN_BLASTS){
-                blastParticlesAtLocation(ballSourcePosition);
-                blastCounter_t -= TIME_BETWEEN_BLASTS;
-            }
+            
         }else if(gameState == 2){
             // Laser mode
             if(Input.GetMouseButton(0)){
@@ -131,111 +115,47 @@ public class NoiseGameManager : MonoBehaviour
             }
 
             laserCollection.transform.position = ballSourcePosition;
-        }
-
-
-        
-
-        
-
-
-        /*
-        // Wind mechanics
-        if(Input.GetMouseButtonDown(0)){
-            Debug.Log("ACTIVE");
-            activeWindTouchObject.SetActive(true);
-        }else if(Input.GetMouseButtonUp(0)){
-            Debug.Log("INACTIVE");
-            activeWindTouchObject.SetActive(false);
-        }else{
-            Vector2 mousePos = Input.mousePosition;
-            Vector2 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
-            activeWindTouchObject.transform.position = worldPos;
         }*/
-
-        ManageStones();
     }
 
     public void RegisterNewActivatedStone(){
-        circlesLeft--;
-        circlesCounter.text = circlesLeft.ToString();
-        if(circlesLeft == 0){
-            if(gameState == 0){
-                // SCENE CHANGE: Transition to continious impulse mode
-                gameState = 1;
-                foreach(Stone s in stonePlacer.stoneScripts){
-                    s.ResetForNewGameState(1);
-                }
+        if(gameState == 1){
+            stage1Manager.RegisterNewActivatedStone();
+        }else if(gameState == 2){
 
-                NetworkMessage msg = new NetworkMessage();
-                msg.source = "Game";
-                msg.command = "SceneChange";
-                msg.changeSceneTo = 1;
-                netManager.SendMessage(msg);
-            }
+        }else if(gameState == 3){
+
         }
-    }
-
-    private void ManageStones(){
-        if(stones == null || stones.Count == 0){
-            return;
-        }
-
-        float maxHitScore = stones[0].GetHitScore();
-        float minHitScore = maxHitScore;
-
-        foreach(Stone s in stones){
-            float hitScore = s.GetHitScore();
-            if(hitScore > maxHitScore){
-                maxHitScore = hitScore;
-            }
-
-            if(hitScore < minHitScore){
-                minHitScore = hitScore;
-            }
-        }
-
-        /*
-        Debug.Log("Max hit score");
-        Debug.Log("Min hit score");
-
-        Debug.Log("Max score = " + maxHitScore);
-        Debug.Log("Min score = " + minHitScore);*/
-    }
-
-    public void ReceivePlayerInput(NetworkMessage msg){
-        
     }
 
     public void HandleCircleButtonClick(NetworkMessage msg){
-        Debug.Log("Toggling glow mode for circle = " + msg.circleButtonID);
-        if(msg.circleButtonState == -1){
-            stonePlacer.stoneScripts[msg.circleButtonID].DisableGlowState();
-        }else{
-            stonePlacer.stoneScripts[msg.circleButtonID].EnableGlowState();
+        if(gameState == 1){
+            stage1Manager.HandleCircleButtonClick(msg);
+        }else if(gameState == 2){
+
+        }else if(gameState == 3){
+
         }
     }
 
     public void HandleSendTouchPositionData(NetworkMessage msg){
-        if(gameState == 0){
-            if(msg.touchState == 1){
-                Vector2 pos = new Vector2(msg.touchPosX, msg.touchPosY);
-                blastParticlesAtLocation(pos * circleBounds.radius);
-            }
-        }else{
-            ballSourcePosition = new Vector2(msg.touchPosX, msg.touchPosY);
-            ballSourcePosition = ballSourcePosition * circleBounds.radius;
+        if(gameState == 1){
+            stage1Manager.HandleSendTouchPositionData(msg);
+        }else if(gameState == 2){
+            stage2Manager.HandleSendTouchPositionData(msg);
+        }else if(gameState == 3){
+
         }
     }
 
     public void HandleKeyChange(NetworkMessage msg){
         if(gameState == 1){
-            Debug.Log("New key: " + msg.newKey);
+            // Do nothing
+        }else if(gameState == 2){
+            stage2Manager.HandleKeyChange(msg);
+        }else if(gameState == 3){
 
-            OscMessage oscMessage = new OscMessage();
-            oscMessage.address = "/keyChange";
-            oscMessage.values.Add(msg.newKey);
-            osc.Send(oscMessage);
         }
+
     }
 }
