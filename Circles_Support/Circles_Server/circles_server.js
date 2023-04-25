@@ -81,8 +81,13 @@ function processPlayerMessage(msgObj, playerWs){
       };
       player1.send(JSON.stringify(p1Message));
       break;
+    case "SendKeyComplete":
+      console.log("Player:SendKeyComplete");
+      msgObj.source = "Server";
+      activeGame.send(JSON.stringify(msgObj));
+      break;
     default:
-      console.log(`Player: Unknown message = ${msg}`);
+      console.log(`Player: Unknown message = ${msgObj}`);
   }
 }
 
@@ -105,6 +110,21 @@ function processGameMessage(msgObj, gameWs){
       msgObj.source = "Server";
       player2.send(JSON.stringify(msgObj));
       player1.send(JSON.stringify(msgObj));
+      break;
+    case "StartOfFocusOnPartial":
+      console.log("Game:StartOfFocusOnPartial");
+      msgObj.source = "Server";
+      player2.send(JSON.stringify(msgObj));
+      break;
+    case "EndOfFocusOnPartial":
+      console.log("Game:EndOfFocusOnPartial");
+      msgObj.source = "Server";
+      player2.send(JSON.stringify(msgObj));
+      break;
+    case "FocusOnPartial":
+      console.log("Game:FocusOnPartial");
+      msgObj.source = "Server";
+      player2.send(JSON.stringify(msgObj));
       break;
     default:
       console.log(`Game: Unknown message = ${msg}`);

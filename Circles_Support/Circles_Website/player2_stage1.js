@@ -39,7 +39,7 @@ function Player2_Stage1(){
     }
 
     this.activateCircle = function(circleButtonID){
-        circleSelectorButtons[circleButtonID].setActive(true);
+        circleSelectorButtons[circleButtonID].setIsActive(true);
     }
 
     this.touchStarted = function(){

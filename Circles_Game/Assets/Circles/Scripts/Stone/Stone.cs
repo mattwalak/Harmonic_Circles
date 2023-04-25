@@ -10,11 +10,6 @@ public class Stone : MonoBehaviour
     private NoiseGameManager gameManager;
     private NetworkManager netManager;
     private SpriteRenderer spriteRenderer;
-    private float hitScore;
-    private const float HIT_DECAY_PER_SEC = 1;
-
-    private const float MIN_HIT_SCORE = 0;
-    private const float MAX_HIT_SCORE = 10;
 
     public StoneGlow glow;
 
@@ -27,11 +22,6 @@ public class Stone : MonoBehaviour
     private bool isInColoredState = false;
     private int numGlowHits = 0;
 
-
-    public float GetHitScore(){
-        return hitScore;
-    }
-
     void Start(){
         gameManager = (NoiseGameManager)FindObjectOfType<NoiseGameManager>();
         netManager = (NetworkManager)FindObjectOfType<NetworkManager>();
@@ -42,15 +32,6 @@ public class Stone : MonoBehaviour
 
         // DEBUG
         EnableGlowState();
-    }
-
-    void Update(){
-        AdjustHitScore(-HIT_DECAY_PER_SEC * Time.deltaTime);
-    }
-
-    private void AdjustHitScore(float ammount){
-        hitScore += ammount;
-        hitScore = Mathf.Clamp(hitScore, MIN_HIT_SCORE, MAX_HIT_SCORE);
     }
 
     public void ResetForNewGameState(int newGameState){
@@ -83,16 +64,38 @@ public class Stone : MonoBehaviour
         glow.gameObject.SetActive(false);
     }
 
+    public void ResetColorState(){
+        numGlowHits = 0;
+        isInColoredState = false;
+        UpdateColor();
+    }
+
     void OnCollisionEnter2D(Collision2D collisionInfo)
     {
-        if(isInGlowState){
-            OscMessage msg = new OscMessage();
-            msg.address = "/playStoneNoteGlowHit";
-            msg.values.Add(stoneNum);
-            msg.values.Add(collisionInfo.gameObject.GetComponent<AirParticle>().GetGain());
-            osc.Send(msg);
+        if(gameManager.gameState == 2){
+            AirParticle particle = collisionInfo.gameObject.GetComponent<AirParticle>();
+            gameManager.RegisterGenericStoneHit(stoneNum, particle.t);
+        }
 
-            if(numGlowHits == 0){
+        if(isInGlowState){
+            if(gameManager.gameState == 1){
+                // Send glow hit osc only in game state 1
+                OscMessage msg = new OscMessage();
+                msg.address = "/playStoneNoteGlowHit";
+                msg.values.Add(stoneNum);
+                msg.values.Add(collisionInfo.gameObject.GetComponent<AirParticle>().GetGain());
+                osc.Send(msg);
+            }else if(gameManager.gameState == 2){
+                // Do not send glow hit osc in game state 2
+                OscMessage msg = new OscMessage();
+                msg.address = "/playStoneNote";
+                msg.values.Add(stoneNum);
+                msg.values.Add(collisionInfo.gameObject.GetComponent<AirParticle>().GetGain());
+                osc.Send(msg);
+            }
+
+            // Send networked glow hit only if in gamemode 1
+            if(numGlowHits == 0 && gameManager.gameState == 1){
                 // First glow hit
                 gameManager.RegisterNewActivatedStone();
                 NetworkMessage netMsgObj = new NetworkMessage();
@@ -124,13 +127,5 @@ public class Stone : MonoBehaviour
             msg.values.Add(collisionInfo.gameObject.GetComponent<AirParticle>().GetGain());
             osc.Send(msg);
         }
-
-        /*
-        transform.localScale = new Vector2(
-            transform.localScale.x + gameManager.scaleAdditionValue,
-            transform.localScale.y + gameManager.scaleAdditionValue
-        );*/
-
-        AdjustHitScore(1.0f);
     }
 }

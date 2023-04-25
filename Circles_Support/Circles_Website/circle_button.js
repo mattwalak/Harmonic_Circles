@@ -60,16 +60,17 @@ function CircleButton(posX, posY, diameter, id, onClickCallback){
         onClickCallback(this.id, -1);
     }
 
-    this.disable = function(){
-        this.isEnabled = false;
+    this.setIsEnabled = function(state){
+        this.isEnabled = state;
     }
 
-    this.enable = function(){
-        this.isEnabled = true;
-    }
-
-    this.setActive = function(state){
+    this.setIsActive = function(state){
         this.isActive = state;
+    }
+
+    // Same functionality as forceDeselect without an onClickCallback
+    this.setIsPressedIn = function(state){
+        this.isPressedIn = state;
     }
 
 }

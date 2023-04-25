@@ -1,6 +1,12 @@
 function Player2_Stage2(){
     let circleSelectorButtons = [];
     let keyButtons = [];
+    let currentKey = 0;
+
+    let requiredCirclesBuffer = [];
+    let activatedCirclesBuffer = [];
+
+    let doneReceivingFocusedPartials = false;
 
     this.setup = function(){
         // Circle Selector Buttons
@@ -17,9 +23,12 @@ function Player2_Stage2(){
                     this.circleButtonCallback
                 )
             );
-            circleSelectorButtons[i].disable();
-        }
 
+            circleSelectorButtons[i].inactiveNotSelectedColor = color(160, 255, 160);
+            circleSelectorButtons[i].inactiveSelectedColor = color(0, 255, 0);
+            circleSelectorButtons[i].setIsEnabled(false);
+        }
+        
         // Key buttons
         for(let i = 0; i < NUM_KEYS; i++){
 			let rad = (2 * Math.PI) - (i * (2 * Math.PI / NUM_KEYS));
@@ -38,6 +47,12 @@ function Player2_Stage2(){
             keyButtons[i].inactiveNotSelectedColor = color(255, 160, 160);
 		}
 
+        // Reset buffers
+        for(var i = 0; i < NUM_CIRCLES; i++){
+            requiredCirclesBuffer.push(false);
+            activatedCirclesBuffer.push(false);
+        }
+
 		keyButtons[0].isPressedIn = true;
     }
 
@@ -52,20 +67,80 @@ function Player2_Stage2(){
     }
 
     this.circleButtonCallback = function(id, stateChange){
-        console.log("CIRCLE BUTTON - CONFIRMING WE ARE CALLING THE CALLBAck for stAgE 2");
+        // Mark our activatedCircles buffer
+        activatedCirclesBuffer[id] = true;
+
+        // Check if we have "passed" this key
+        let keyPassed = doneReceivingFocusedPartials;
+        if(doneReceivingFocusedPartials){
+            for(let i = 0; i < NUM_CIRCLES; i++){
+                if(requiredCirclesBuffer[i]){
+                    if(!activatedCirclesBuffer[i]){
+                        keyPassed = false;
+                        break;
+                    }
+                }
+            } 
+        }
+        
+        // Send network signal for sound generation
+        // NETWORK - sound for activated key
+        networkSend_CircleButtonClick(id, 1);
+
+        if(keyPassed){
+            // NETWORK  - key passed
+            keyButtons[currentKey].setIsActive(true);
+            networkSend_KeyComplete(currentKey);
+        }
     }
 
     this.keyButtonCallback = function(id, stateChange){
         if(stateChange == 1){
+            // On keyChange functionality
+            currentKey = id;
+
             // Send toggle signal
             for(let i = 0; i < keyButtons.length; i++){
                 if(i != id && keyButtons[i].isPressedIn){
                     keyButtons[i].forceDeselect();
                 }
             }
+
+            // Reset all the circleButtons
+            for(let i = 0; i < circleSelectorButtons.length; i++){
+                circleSelectorButtons[i].setIsActive(false);
+                circleSelectorButtons[i].setIsEnabled(false);
+                circleSelectorButtons[i].setIsPressedIn(false);
+            }
+
+            // Reset buffers
+            for(var i = 0; i < NUM_CIRCLES; i++){
+                requiredCirclesBuffer[i] = false;
+                activatedCirclesBuffer[i] = false;
+            }
+
         }
 
+
+
         networkSend_KeyChange(id);
+    }
+
+    this.startOfFocusOnPartial = function(){
+        doneReceivingFocusedPartials = false;
+        for(var i = 0; i < NUM_CIRCLES; i++){
+            requiredCirclesBuffer[i] = false;
+        }
+    }
+
+    this.focusOnPartial = function(circleID){
+        requiredCirclesBuffer[circleID] = true;
+
+        circleSelectorButtons[circleID].setIsEnabled(true);
+    }
+
+    this.endOfFocusOnPartial = function(){
+        doneReceivingFocusedPartials = true;
     }
 
     this.touchStarted = function(){

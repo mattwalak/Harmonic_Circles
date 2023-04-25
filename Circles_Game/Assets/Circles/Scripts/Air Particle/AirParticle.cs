@@ -9,8 +9,8 @@ public class AirParticle : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
 
-    private float expirationTime = 5f;
-    private float t = 0f;
+    public float expirationTime = 5f;
+    public float t = 0f;
 
     void Start(){
         rb2D = GetComponent<Rigidbody2D>();

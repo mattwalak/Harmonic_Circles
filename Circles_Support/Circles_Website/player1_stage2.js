@@ -1,7 +1,7 @@
 function Player1_Stage2(){
     let sourcePos = createVector(width/2, height/2);
     let sourceScale;
-    let sourceIsMobile = true;
+    let sourceIsMobile = false;
 
     this.setup = function(){
         sourceScale = width/10;

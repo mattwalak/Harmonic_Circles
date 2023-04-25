@@ -48,6 +48,10 @@ public class NetworkManager : MonoBehaviour
                         handlers.Add(HandleSendKeyChange);
                         messages.Add(msgObj);
                         break;
+                    case "SendKeyComplete":
+                        handlers.Add(HandleSendKeyComplete);
+                        messages.Add(msgObj);
+                        break;
                     default:
                         Debug.Log("ERROR - Unknown command");
                         break;
@@ -86,6 +90,12 @@ public class NetworkManager : MonoBehaviour
             playerConnectionManager.HandlePlayerInputData(msgObj);
         }else if(isNoiseGameScene){
 
+        }
+    }
+
+    public void HandleSendKeyComplete(NetworkMessage msgObj){
+        if(isNoiseGameScene){
+            noiseGameManager.HandleSendKeyComplete(msgObj);
         }
     }
 

@@ -12,7 +12,7 @@ let playerNum = -1;
 let gameState = 0;
 
 let NUM_CIRCLES = 20;
-var NUM_KEYS = 12;
+var NUM_KEYS = 6;
 let MAIN_RING_DIAMETER;
 let SMALLER_RING_DIAMETER;
 let font;
@@ -62,41 +62,6 @@ function draw(){
 			}
 		}
 	}
-
-
-	/*
-	if(menuState == 0){
-		connectToServerButton.draw();
-	}else if(menuState == 1){
-		fill(255);
-		textSize(16);
-		text("...waiting for server response", width/2, height/2);
-	}else if(menuState == 2){
-		fill(255);
-		textSize(16);
-		text("connection failed\nreload to try again", width/2, height/2);
-	}else if(menuState == 3){
-		if(playerNum == 1){
-			
-  			
-
-
-		}else if(playerNum == 2){
-			for(let i = 0; i < circleButtons.length; i++){
-				fill(255);
-				circleButtons[i].draw();
-			}
-
-			if(gameState == 1){
-				for(let i = 0; i < keyButtons.length; i++){
-					fill(255);
-					keyButtons[i].draw();
-				}
-			}
-		}
-
-	}*/
-	
 }
 
 function nextGameStage(){
@@ -139,31 +104,6 @@ function keyButtonCallback(id, stateChange){
 	}
 }
 
-/*
-function onTransitionToRhythmMode(){
-	if(playerNum == 2){
-		
-		for(let i = 0; i < NUM_KEYS; i++){
-			let rad = (2 * Math.PI) - (i * (2 * Math.PI / NUM_KEYS));
-			let xPos = Math.cos(rad) * smallerRingDiameter / 2;
-			let yPos = Math.sin(rad) * smallerRingDiameter / 2;
-			keyButtons.push(
-				new CircleButton(
-					(width/2) + xPos, 
-					(height/2) + yPos, 
-					width/15, 
-					i, 
-					keyButtonCallback
-				)
-			);
-		}
-
-		keyButtons[0].isPressedIn = true;
-	}
-
-	gameState = 1;
-}*/
-
 // INPUT
 function touchStarted(){
 	if(gameState == 0){
@@ -187,20 +127,6 @@ function touchStarted(){
 			}
 		}
 	}
-
-
-	/*
-	if(playerNum == 1){
-		
-	}else if(playerNum == 2){
-		
-
-		if(gameState == 1){
-			for(let i = 0; i < keyButtons.length; i++){
-				keyButtons[i].checkClick();
-			}
-		}
-	}*/
 
   	return false;
 }
@@ -228,10 +154,6 @@ function touchMoved(){
 		}
 	}
 
-	/*
-	if(playerNum == 1){
-		calculateAndSendTouchPositionData(0);
-	}*/
   	return false;
 }
 
@@ -287,5 +209,23 @@ function onNetwork_SceneChange(msgObj){
 function onNetwork_Player2SentKeyChange(msgObj){
 	if(playerNum == 1 && gameState == 2){
 		player1stage2.unlockSource();
+	}
+}
+
+function onNetwork_StartOfFocusOnPartial(msgObj){
+	if(playerNum == 2 && gameState == 2){
+		player2stage2.startOfFocusOnPartial();
+	}
+}
+
+function onNetwork_EndOfFocusOnPartial(msgObj){
+	if(playerNum == 2 && gameState == 2){
+		player2stage2.endOfFocusOnPartial();
+	}
+}
+
+function onNetwork_FocusOnPartial(msgObj){
+	if(playerNum == 2 && gameState == 2){
+		player2stage2.focusOnPartial(msgObj.circleButtonID);
 	}
 }

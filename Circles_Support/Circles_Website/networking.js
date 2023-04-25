@@ -29,6 +29,18 @@ function processServerMessage(msgObj){
       console.log("Server:Player2SentKeyChange");
       onNetwork_Player2SentKeyChange(msgObj);
       break;
+    case "StartOfFocusOnPartial":
+      console.log("Server:StartOfFocusOnPartial");
+      onNetwork_StartOfFocusOnPartial(msgObj);
+      break;
+    case "EndOfFocusOnPartial":
+      console.log("Server:EndOfFocusOnPartial");
+      onNetwork_EndOfFocusOnPartial(msgObj);
+      break;
+    case "FocusOnPartial":
+      console.log("Server:FocusOnPartial");
+      onNetwork_FocusOnPartial(msgObj);
+      break;
     default:
       console.log(`Designer: Unknown command = ${msg}`);
   }
@@ -96,6 +108,15 @@ function networkSend_KeyChange(key){
     source: "Player",
     command: "SendKeyChange",
     newKey: key
+  }
+
+  socket.send(JSON.stringify(msg));
+}
+
+function networkSend_KeyComplete(key){
+  msg = {
+    source: "Player",
+    command: "SendKeyComplete",
   }
 
   socket.send(JSON.stringify(msg));

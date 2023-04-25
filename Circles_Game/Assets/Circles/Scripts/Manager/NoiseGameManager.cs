@@ -11,7 +11,7 @@ public class NoiseGameManager : MonoBehaviour
     public Stage3_Manager stage3Manager;
     
     public int NUM_CIRCLES = 20;
-    public int NUM_KEYS = 12;
+    public int NUM_KEYS = 6;
 
     public TMP_Text progressTextCounter;
 
@@ -30,7 +30,7 @@ public class NoiseGameManager : MonoBehaviour
     // 1 = impulse mode
     // 2 = rhythmic impulse mode
     // 3 = laser mode
-    private int gameState = 0;
+    public int gameState = 0;
 
     public const int NUM_PARTICLES_PER_CLICK = 10;
     public const float PARTICLE_VELOCITY = 3.0f;
@@ -97,16 +97,6 @@ public class NoiseGameManager : MonoBehaviour
 
     void Update(){
         /*
-        blastCounter_t += Time.deltaTime;
-        
-        if(gameState == 0){
-            // Impulse mode
-            
-
-        }else if(gameState == 1){
-            // Rhythm mode
-            
-        }else if(gameState == 2){
             // Laser mode
             if(Input.GetMouseButton(0)){
                 Vector2 mousePos = Input.mousePosition;
@@ -115,14 +105,24 @@ public class NoiseGameManager : MonoBehaviour
             }
 
             laserCollection.transform.position = ballSourcePosition;
-        }*/
+        */
     }
 
     public void RegisterNewActivatedStone(){
         if(gameState == 1){
             stage1Manager.RegisterNewActivatedStone();
         }else if(gameState == 2){
+            // Do nothing
+        }else if(gameState == 3){
 
+        }
+    }
+
+    public void RegisterGenericStoneHit(int stoneNum, float particle_t){
+        if(gameState == 1){
+            // Do nothing
+        }else if(gameState == 2){
+            stage2Manager.RegisterGenericStoneHit(stoneNum, particle_t);
         }else if(gameState == 3){
 
         }
@@ -132,7 +132,7 @@ public class NoiseGameManager : MonoBehaviour
         if(gameState == 1){
             stage1Manager.HandleCircleButtonClick(msg);
         }else if(gameState == 2){
-
+            stage2Manager.HandleCircleButtonClick(msg);
         }else if(gameState == 3){
 
         }
@@ -156,6 +156,16 @@ public class NoiseGameManager : MonoBehaviour
         }else if(gameState == 3){
 
         }
-
     }
+
+    public void HandleSendKeyComplete(NetworkMessage msg){
+        if(gameState == 1){
+            // Do nothing
+        }else if(gameState == 2){
+            stage2Manager.HandleSendKeyComplete(msg);
+        }else if(gameState == 3){
+
+        }
+    }
+
 }
