@@ -314,7 +314,6 @@ OSCdef(\updateLaserData, {|msg|
 	harmony_B_freqs_1 = Array.new();
 	harmony_B_freqs_2 = Array.new();*/
 
-	~harmony_freqs_array_1.postln;
 	harmony_A_freqs_1 = ~harmony_freqs_array_1[angleDiv];
 	harmony_A_freqs_2 = ~harmony_freqs_array_2[angleDiv];
 	harmony_B_freqs_1 = ~harmony_freqs_array_1[(angleDiv + 1) % 4];
@@ -323,11 +322,7 @@ OSCdef(\updateLaserData, {|msg|
 	harmony_B_freqs = Array.new();
 
 	~notes_per_chord.do({|i|
-		i.postln;
-		("harmony_A_freqs_1 = " + harmony_A_freqs_1).postln;
-		("harmony_A_freqs_2 = " + harmony_A_freqs_2).postln;
 		harmony_A_freqs = harmony_A_freqs.add((harmony_A_freqs_1[i] * (currentHarmonyMagnitude)) + (harmony_A_freqs_2[i] * (1.0 - currentHarmonyMagnitude)));
-		"fuck".postln;
 		harmony_B_freqs = harmony_B_freqs.add((harmony_B_freqs_1[i] * (currentHarmonyMagnitude)) + (harmony_B_freqs_2[i] * (1.0 - currentHarmonyMagnitude)));
 	});
 
@@ -335,8 +330,6 @@ OSCdef(\updateLaserData, {|msg|
 		lerped = (harmony_A_freqs[i] * (1.0 - angleMod)) + (harmony_B_freqs[i] * (angleMod));
 		harmony_interp_freqs = harmony_interp_freqs.add(lerped);
 	});
-
-	harmony_interp_freqs.postln;
 
 	~notes_per_chord.do({|i|
 		laserVoices[i].set(\fund, harmony_interp_freqs[i]);

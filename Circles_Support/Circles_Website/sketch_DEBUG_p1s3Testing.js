@@ -1,8 +1,7 @@
-function Player2_Stage3(){
-    let polarReferenceDir = createVector(0, -1);
-
-    let sourcePos = createVector(width/2, height/2);
-    let normSourcePos = createVector(0, 0);
+    let polarReferenceDir;
+	
+	let sourcePos = 0;
+	let normSourcePos = 0;
     let sourceMagnitude = 1;
     let sourceDegree = 0;
 
@@ -22,16 +21,27 @@ function Player2_Stage3(){
 	let degreeInterpAcceleration = 1000;
 	let degreeInterpDirection = -1; // Negative is decreasing, positive is increasing
 
-    let markerDotSize;
+	let MAIN_RING_DIAMETER = 0;
+	let SMALLER_RING_DIAMETER = 0;
+	let markerDotSize;
 
-    this.setup = function(){
+    function setup(){
+		createCanvas(windowWidth, windowHeight);
+		background(0);
+
         sourceScale = width/10;
         angleMode(DEGREES);
-        markerDotSize = width / 20;
+		sourcePos = createVector(width/2, height/2);
+		normSourcePos = createVector(0, 0);
+		polarReferenceDir = createVector(0, -1);
+
+		MAIN_RING_DIAMETER = width * 5/6;
+		SMALLER_RING_DIAMETER = width * 1/2;
+		markerDotSize = width / 20;
     }
 
-    this.draw = function(){
-        // Update snap stuff
+    function draw(){
+		// Update snap stuff
 		let coordinateUpdateScheduled = (isDegreeInterping || isMagnitudeInterping);
 
 		if(isDegreeInterping){
@@ -71,8 +81,7 @@ function Player2_Stage3(){
 		}
 
 		if(coordinateUpdateScheduled){
-			this.calculateAndSetCartesianFromPolar();
-            this.sendSourcePosition();
+			calculateAndSetCartesianFromPolar();
 		}
 
 		background(0);
@@ -91,15 +100,16 @@ function Player2_Stage3(){
         circle(sourcePos.x, sourcePos.y, sourceScale);
     }
 
-    this.calculateAndSetPolarFromCartesian = function(){
-        sourceMagnitude = normSourcePos.mag();
+    function calculateAndSetPolarFromCartesian(){
+		sourceMagnitude = normSourcePos.mag();
 		sourceDegree = normSourcePos.angleBetween(polarReferenceDir);
 		if(sourceDegree < 0){
 			sourceDegree = 360 + sourceDegree;
 		}
     }
 
-    this.calculateAndSetCartesianFromPolar = function(){
+    function calculateAndSetCartesianFromPolar(){
+		console.log("here");
         let p5angle = sourceDegree;
 		if(p5angle > 180){
 			p5angle = p5angle - 360;
@@ -115,13 +125,19 @@ function Player2_Stage3(){
 
 		sourcePos.x = sourcePos.x + (width/2);
 		sourcePos.y = sourcePos.y + (height/2);
+
+		console.log(""+normSourcePos);
     }
 
-    this.sendSourcePosition = function(){
-        networkSend_TouchPositionData(1, normSourcePos.x, -normSourcePos.y, 2);
+    function sendTouchPosition(){
+        var normX = sourcePos.x - (width/2);
+        normX = normX / (MAIN_RING_DIAMETER/2);
+        var normY = sourcePos.y - (height/2);
+        normY = normY / (MAIN_RING_DIAMETER/2);
+        // networkSend_TouchPositionData(1, normX, -normY, 1);
     }
 
-    this.generalTouchFunction = function(){
+    function generalTouchFunction(){
         normSourcePos.x = (mouseX - (width/2)) / (MAIN_RING_DIAMETER / 2);
         normSourcePos.y = (mouseY - (height/2)) / (MAIN_RING_DIAMETER / 2);
 
@@ -134,20 +150,20 @@ function Player2_Stage3(){
         sourcePos.x = (width / 2) + (normSourcePos.x * (MAIN_RING_DIAMETER / 2));
         sourcePos.y = (height / 2) + (normSourcePos.y * (MAIN_RING_DIAMETER / 2));
 
-        this.sendSourcePosition();
+        sendTouchPosition();
     }
 
-    this.touchStarted = function(){
-        this.generalTouchFunction();
+    function touchStarted(){
+        generalTouchFunction();
     }
 
-    this.touchMoved = function(){
-        this.generalTouchFunction();
+    function touchMoved(){
+        generalTouchFunction();
     }
 
-    this.touchEnded = function(){
+    function touchEnded(){
         // Activate interps to lock in on important spots in the circle
-		this.calculateAndSetPolarFromCartesian();
+		calculateAndSetPolarFromCartesian();
 
 		// Degree interp
 		let backGoal = Math.floor(sourceDegree / 90);
@@ -181,4 +197,3 @@ function Player2_Stage3(){
 		magnitudeInterpVelocity = magnitudeInterpVelocityStartValue;
 		isMagnitudeInterping = true;
     }
-}
