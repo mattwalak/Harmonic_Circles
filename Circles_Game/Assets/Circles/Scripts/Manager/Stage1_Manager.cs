@@ -16,6 +16,10 @@ public class Stage1_Manager : MonoBehaviour
     }
 
     public void ExitStage(){
+        foreach(Stone s in noiseGameManager.stonePlacer.stoneScripts){
+            s.ResetForNewGameState(1);
+        }
+
         stageIsActive = false;
     }
 
@@ -37,10 +41,6 @@ public class Stage1_Manager : MonoBehaviour
         circlesLeft--;
         noiseGameManager.UpdateProgressCounter(circlesLeft);
         if(circlesLeft == 0){
-            foreach(Stone s in noiseGameManager.stonePlacer.stoneScripts){
-                s.ResetForNewGameState(1);
-            }
-
             NetworkMessage msg = new NetworkMessage();
             msg.source = "Game";
             msg.command = "SceneChange";

@@ -35,7 +35,12 @@ public class Stone : MonoBehaviour
     }
 
     public void ResetForNewGameState(int newGameState){
-        if(newGameState == 1){
+        if(newGameState == 2){
+            DisableGlowState();
+            isInColoredState = false;
+            numGlowHits = 0;
+            UpdateColor();
+        }else if(newGameState == 3){
             DisableGlowState();
             isInColoredState = false;
             numGlowHits = 0;

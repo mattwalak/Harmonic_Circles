@@ -123,13 +123,14 @@ function networkSend_KeyComplete(key){
 }
 
 // clickUpdate: 1 = click started, 0 = no change, -1 = click ended
-function networkSend_TouchPositionData(touchState, posX, posY){
+function networkSend_TouchPositionData(touchState, posX, posY, playerNum = 1){
   msg = {
     source: "Player",
     command: "SendTouchPositionData",
     touchState: touchState,
     touchPosX: posX,
-    touchPosY: posY
+    touchPosY: posY,
+    playerNumber: playerNum
   };
 
   socket.send(JSON.stringify(msg));

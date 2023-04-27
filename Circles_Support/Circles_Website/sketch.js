@@ -1,231 +1,113 @@
-let playerConnectionStage, player1stage1, player1stage2, player2stage1, player2stage2;
+    let polarReferenceDir;
+	
+	let sourcePos = 0;
+	let normSourcePos = 0;
+    let sourceMagnitude = 1;
+    let sourceDegree = 0;
 
-// -1 = unassigned
-// 1 = big circle, 
-// 2 = ring of buttons
-let playerNum = -1;
+    let sourceScale;
 
-// 0 = SETUP (Not in game yet)
-// 1 = impulse mode
-// 2 = rhytmic impulse mode
-// 3 = laser mode
-let gameState = 0;
+    let isMagnitudeInterping = false;
+    let magnitudeInterpGoal = -1;
+    let magnitudeInterpVelocity = 10; // px/sec
+    let isDegreeInterping = false;
+    let degreeInterpGoal = -1;
+    let degreeInterpVelocity = 10; // deg/sec
 
-let NUM_CIRCLES = 20;
-var NUM_KEYS = 6;
-let MAIN_RING_DIAMETER;
-let SMALLER_RING_DIAMETER;
-let font;
+	let MAIN_RING_DIAMETER = 0;
+	let SMALLER_RING_DIAMETER = 0;
 
-let stage1ProgressionCount = 0; // [0, NUM_CIRCLES]
+    function setup(){
+		createCanvas(windowWidth, windowHeight);
+		background(0);
 
-function preload(){
-	font = loadFont('assets/Metropolis-Regular.otf');
-}
+        sourceScale = width/10;
+        angleMode(DEGREES);
+		sourcePos = createVector(width/2, height/2);
+		normSourcePos = createVector(0, 0);
+		polarReferenceDir = createVector(0, -1);
 
-function setup(){
-	createCanvas(windowWidth, windowHeight);
-	background(0);
+		sourceDegree = 75;
+		sourceMagnitude = 0.4;
+		calculateAndSetCartesianFromPolar();
 
-	playerConnectionStage = new PlayerConnectionStage();
-	playerConnectionStage.setup();
-
-	MAIN_RING_DIAMETER = width * 5/6;
-	SMALLER_RING_DIAMETER = width * 1/2;
-
-	player1stage1 = new Player1_Stage1();
-	player1stage2 = new Player1_Stage2();
-	player2stage1 = new Player2_Stage1();
-	player2stage2 = new Player2_Stage2();
-}
-
-function draw(){
-	background(0);
-	if(gameState == 0){
-		playerConnectionStage.draw();
-	}else{
-		if(playerNum == 1){
-			if(gameState == 1){
-				player1stage1.draw();
-			}else if(gameState == 2){
-				player1stage2.draw();
-			}else if(gameState == 3){
-
-			}
-		}else if(playerNum == 2){
-			if(gameState == 1){
-				player2stage1.draw();
-			}else if(gameState == 2){
-				player2stage2.draw();
-			}else if(gameState == 3){
-				
-			}
-		}
-	}
-}
-
-function nextGameStage(){
-	// We use a temp value because as soon as the real gameState increases
-	// draw can call functions in the new state. We want to finish all setup
-	// to avoid drawing a stage that has not been setup yet.
-	tempGameStateIncrease = gameState + 1;
-
-	if(playerNum == 1){
-		if(tempGameStateIncrease == 1){
-			player1stage1.setup();
-		}else if(tempGameStateIncrease == 2){
-			player1stage2.setup();
-		}else if(tempGameStateIncrease == 3){
-			
-		}
-	}else if(playerNum == 2){
-		if(tempGameStateIncrease == 1){
-			player2stage1.setup();
-		}else if(tempGameStateIncrease == 2){
-			player2stage2.setup();
-		}else if(tempGameStateIncrease == 3){
-			
-		}
-	}
-
-	// Now that setup is complete, actually increase the variable
-	gameState++;
-}
-
-function keyButtonCallback(id, stateChange){
-	if(stateChange == 1){
-		// Send toggle signal
-		for(let i = 0; i < keyButtons.length; i++){
-			keyButtons[i].otherCircleSelected(id);
-		}
-		
-		// Send network signal
-		sendKeyChange(id);
-	}
-}
-
-// INPUT
-function touchStarted(){
-	if(gameState == 0){
-		playerConnectionStage.touchStarted();
-	}else{
-		if(playerNum == 1){
-			if(gameState == 1){
-				player1stage1.touchStarted();
-			}else if(gameState == 2){
-				player1stage2.touchStarted();
-			}else if(gameState == 3){
-
-			}
-		}else if(playerNum == 2){
-			if(gameState == 1){
-				player2stage1.touchStarted();
-			}else if(gameState == 2){
-				player2stage2.touchStarted();
-			}else if(gameState == 3){
-				
-			}
-		}
-	}
-
-  	return false;
-}
-
-function touchMoved(){
-	if(gameState == 0){
-		playerConnectionStage.touchMoved();
-	}else{
-		if(playerNum == 1){
-			if(gameState == 1){
-				player1stage1.touchMoved();
-			}else if(gameState == 2){
-				player1stage2.touchMoved();
-			}else if(gameState == 3){
-
-			}
-		}else if(playerNum == 2){
-			if(gameState == 1){
-				player2stage1.touchMoved();
-			}else if(gameState == 2){
-				player2stage2.touchMoved();
-			}else if(gameState == 3){
-				
-			}
-		}
-	}
-
-  	return false;
-}
-
-function touchEnded(){
-	if(gameState == 0){
-		playerConnectionStage.touchEnded();
-	}else{
-		if(playerNum == 1){
-			if(gameState == 1){
-				player1stage1.touchEnded();
-			}else if(gameState == 2){
-				player1stage2.touchEnded();
-			}else if(gameState == 3){
-
-			}
-		}else if(playerNum == 2){
-			if(gameState == 1){
-				player2stage1.touchEnded();
-			}else if(gameState == 2){
-				player2stage2.touchEnded();
-			}else if(gameState == 3){
-				
-			}
-		}
-	}
-
-  	return false;
-}
-
-// NETWORK CALLBACKS
-
-function onNetwork_ConnectionSuccess(msgObj){
-	playerNum = msgObj.playerNum;
-	nextGameStage();
-}
-
-function onNetwork_ConnectionFailed(msgObj){
-	playerConnectionStage.onConnectionFailed();
-}
-
-function onNetwork_SendCircleButtonUpdateFromGame(msgObj){
-	if(playerNum == 2 && gameState == 1){
-		player2stage1.activateCircle(msgObj.circleButtonID);
+		MAIN_RING_DIAMETER = width * 5/6;
+		SMALLER_RING_DIAMETER = width * 1/2;
     }
 
-	stage1ProgressionCount++;
-}
+    function draw(){
+		background(0);
+        fill(255);
 
-function onNetwork_SceneChange(msgObj){
-	nextGameStage();
-}
+		circle(width/2, height/2, MAIN_RING_DIAMETER);
 
-function onNetwork_Player2SentKeyChange(msgObj){
-	if(playerNum == 1 && gameState == 2){
-		player1stage2.unlockSource();
-	}
-}
+        fill(0, 255, 0);
+        circle(sourcePos.x, sourcePos.y, sourceScale);
+    }
 
-function onNetwork_StartOfFocusOnPartial(msgObj){
-	if(playerNum == 2 && gameState == 2){
-		player2stage2.startOfFocusOnPartial();
-	}
-}
+    function calculateAndSetPolarFromCartesian(){
+		sourceMagnitude = normSourcePos.mag();
+		sourceDegree = normSourcePos.angleBetween(polarReferenceDir);
+		if(sourceDegree < 0){
+			sourceDegree = 360 + sourceDegree;
+		}
+    }
 
-function onNetwork_EndOfFocusOnPartial(msgObj){
-	if(playerNum == 2 && gameState == 2){
-		player2stage2.endOfFocusOnPartial();
-	}
-}
+    function calculateAndSetCartesianFromPolar(){
+		console.log("here");
+        let p5angle = sourceDegree;
+		if(p5angle > 180){
+			p5angle = p5angle - 360;
+		}
 
-function onNetwork_FocusOnPartial(msgObj){
-	if(playerNum == 2 && gameState == 2){
-		player2stage2.focusOnPartial(msgObj.circleButtonID);
-	}
-}
+		normSourcePos = polarReferenceDir.copy();
+		normSourcePos.rotate(-p5angle) 
+		normSourcePos.setMag(sourceMagnitude);
+		sourcePos = normSourcePos.copy();
+		
+		sourcePos.x = sourcePos.x * (MAIN_RING_DIAMETER/2);
+		sourcePos.y = sourcePos.y * (MAIN_RING_DIAMETER/2);
+
+		sourcePos.x = sourcePos.x + (width/2);
+		sourcePos.y = sourcePos.y + (height/2);
+    }
+
+    function sendTouchPosition(){
+        var normX = sourcePos.x - (width/2);
+        normX = normX / (MAIN_RING_DIAMETER/2);
+        var normY = sourcePos.y - (height/2);
+        normY = normY / (MAIN_RING_DIAMETER/2);
+        // networkSend_TouchPositionData(1, normX, -normY, 1);
+    }
+
+    function generalTouchFunction(){
+        normSourcePos.x = (mouseX - (width/2)) / (MAIN_RING_DIAMETER / 2);
+        normSourcePos.y = (mouseY - (height/2)) / (MAIN_RING_DIAMETER / 2);
+
+        let dist = Math.sqrt(Math.pow(normSourcePos.x, 2) + Math.pow(normSourcePos.y, 2));
+        if(dist > 1){
+            normSourcePos.x = normSourcePos.x * 1 / dist;
+            normSourcePos.y = normSourcePos.y * 1 / dist;
+        }
+
+        sourcePos.x = (width / 2) + (normSourcePos.x * (MAIN_RING_DIAMETER / 2));
+        sourcePos.y = (height / 2) + (normSourcePos.y * (MAIN_RING_DIAMETER / 2));
+
+		calculateAndSetPolarFromCartesian();
+        sendTouchPosition();
+    }
+
+    function touchStarted(){
+        generalTouchFunction();
+    }
+
+    function touchMoved(){
+        generalTouchFunction();
+    }
+
+    function touchEnded(){
+        // Activate interps to lock in a important spots in the circle
+		
+
+        // this.generalTouchFunction();
+    }

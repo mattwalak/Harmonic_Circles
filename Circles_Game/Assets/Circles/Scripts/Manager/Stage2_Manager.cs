@@ -48,6 +48,10 @@ public class Stage2_Manager : MonoBehaviour
     }
 
     public void ExitStage(){
+        foreach(Stone s in noiseGameManager.stonePlacer.stoneScripts){
+            s.ResetForNewGameState(2);
+        }
+
         stageIsActive = false;
     }
 
@@ -137,11 +141,31 @@ public class Stage2_Manager : MonoBehaviour
 
     public void HandleCircleButtonClick(NetworkMessage msg){
         noiseGameManager.stonePlacer.stoneScripts[msg.circleButtonID].EnableGlowState();
+
+        // SOUND - FocusOnPartialHit
+        OscMessage oscMsg = new OscMessage();
+        oscMsg.address = "/playFocusOnPartialHit";
+        oscMsg.values.Add(msg.circleButtonID);
+        noiseGameManager.SendOscMessage(oscMsg);
     }
 
     public void HandleSendKeyComplete(NetworkMessage msg){
         keysLeft--;
         noiseGameManager.UpdateProgressCounter(keysLeft);
+
+        float levelProgress = (keysLeft/noiseGameManager.NUM_KEYS);
+        currentTimeBetweenBlasts = 
+            Mathf.Lerp(TIME_BETWEEN_BLASTS_MIN, TIME_BETWEEN_BLASTS_MAX, 1-levelProgress);
+
+        if(keysLeft == 0){
+            NetworkMessage msgOut = new NetworkMessage();
+            msgOut.source = "Game";
+            msgOut.command = "SceneChange";
+            msgOut.changeSceneTo = 3;
+            noiseGameManager.SendNetworkMessage(msgOut);
+
+            noiseGameManager.NextScene();
+        }
     }
 
 }

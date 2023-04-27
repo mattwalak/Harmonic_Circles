@@ -11,7 +11,7 @@ public class NoiseGameManager : MonoBehaviour
     public Stage3_Manager stage3Manager;
     
     public int NUM_CIRCLES = 20;
-    public int NUM_KEYS = 6;
+    public int NUM_KEYS = 1;
 
     public TMP_Text progressTextCounter;
 
@@ -144,7 +144,7 @@ public class NoiseGameManager : MonoBehaviour
         }else if(gameState == 2){
             stage2Manager.HandleSendTouchPositionData(msg);
         }else if(gameState == 3){
-
+            stage3Manager.HandleSendTouchPositionData(msg);
         }
     }
 

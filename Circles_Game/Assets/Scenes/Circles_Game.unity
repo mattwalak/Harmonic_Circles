@@ -2379,12 +2379,15 @@ MonoBehaviour:
   stage2Manager: {fileID: 1308144737}
   stage3Manager: {fileID: 1214503236}
   NUM_CIRCLES: 20
+  NUM_KEYS: 1
   progressTextCounter: {fileID: 1219408214}
   osc: {fileID: 1191572185}
   laserCollection: {fileID: 1035317889}
   stonePlacer: {fileID: 110139922}
   circleBounds: {fileID: 909344485}
   airParticlePrefab: {fileID: 3766511113328021971, guid: edd42dad3f441254f82d0aa54b262433, type: 3}
+  mainCamera: {fileID: 0}
+  gameState: 0
 --- !u!4 &888220288
 Transform:
   m_ObjectHideFlags: 0
@@ -3185,6 +3188,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   noiseGameManager: {fileID: 888220287}
+  laserCollectionObj: {fileID: 1035317889}
 --- !u!1 &1219408212
 GameObject:
   m_ObjectHideFlags: 0

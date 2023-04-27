@@ -47,7 +47,7 @@ public class LaserCollection : MonoBehaviour
             for(int componentNum = 0; componentNum < MAX_REFLECTIONS; componentNum++){
                 int hitStone = l.hitLog[componentNum];
                 if(hitStone >= 0){
-                    amplitudeValues[hitStone - 1] += (1.0f/(componentNum + 1));
+                    amplitudeValues[hitStone] += (1.0f/(componentNum + 1));
                 }
             }
         }
@@ -79,11 +79,12 @@ public class LaserCollection : MonoBehaviour
             }*/
         }
 
+        /*
         string s = "";
         for(int i = 0; i < values.Length; i++){
             s  = s + values[i].ToString() + " ";
         }
-        Debug.Log("amp vals:" + s);
+        Debug.Log("amp vals:" + s);*/
 
         OscMessage msg = new OscMessage();
         msg.address = "/updateLaserData";
