@@ -62,6 +62,15 @@ var activeFundamental = 55;
 ~harmony_freqs_array_1 = [];
 ~harmony_freqs_array_2 = [];
 
+
+SynthDef(\keyCompleteFlourish, {
+	arg freq = 440, pan = 0, mul = 1;
+	var sig, env;
+	env = EnvGen.kr(Env.new([0, 1, 0.8, 0], [0.01, 0.5, 0.5]), doneAction: 2);
+	sig = SinOsc.ar(freq, 0, mul) * env * 0.3;
+	Out.ar(0, Pan2.ar(sig, pan));
+}).add;
+
 SynthDef(\wah,{ |freq = 65.41|
 	// Start with 15 partials all at equal gain
 	var numPartials = 15;
@@ -88,7 +97,7 @@ SynthDef(\wah,{ |freq = 65.41|
 	sig = (0.7 * sig) + (0.3 * DelayN.ar(sig, 0.2, 0.2));
 	sig = Pan2.ar(sig, EnvGen.kr(panEnv));
 
-	Out.ar(0, 0.5 * sig);
+	Out.ar(0, 0.4 * sig);
 }).add;
 
 SynthDef(\bell, { |freq = 440, dur = 0.1, pan = 0|
@@ -131,7 +140,7 @@ SynthDef(\bell, { |freq = 440, dur = 0.1, pan = 0|
 	var mixedSig, sig, upperDelay;
 
 	// Use local feedback for a delay effect on the sixteenth note
-	local = DelayN.ar(local, ~sixteenth_tick + 0.01, ~sixteenth_tick + 0.01);
+	local = DelayN.ar(local, 0.2 + 0.01, 0.2 + 0.01);
 	local = (0.5 * car3*EnvGen.ar(env3)) + (0.5 * local);
 
 	mixedSig = 0.5*(mixCar1*car1*EnvGen.ar(env1)) + (mixCar2*car2*EnvGen.ar(env2)) + (mixCar3*local) + (noiseMix*noise*EnvGen.ar(noiseEnv, doneAction: 2));
@@ -373,6 +382,29 @@ OSCdef(\keyChange, {|msg|
 }, '/keyChange');
 
 OSCdef(\keyComplete, {
+	var freqs, durs, muls, pans;
+	var freqsSeq, dursSeq, mulsSeq, pansSeq, totalBind;
+
+	freqs = Array.new();
+	durs = Array.new();
+	muls = Array.new();
+	pans = Array.new();
+
+	25.do({ |i|
+		freqs = freqs.add((i + 1) * activeFundamental * 2);
+		durs = durs.add(0.05);
+		muls = muls.add(1.0 / (i + 1));
+		pans = pans.add(cos((i/12.5)*2*pi));
+	});
+
+	freqsSeq = Pseq(freqs, 1);
+	dursSeq = Pseq(durs, 1);
+	mulsSeq = Pseq(muls, 1);
+	pansSeq = Pseq(pans, 1);
+
+	totalBind = Pbind(\instrument, \keyCompleteFlourish, \freq, freqsSeq, \dur, dursSeq, \mul, mulsSeq, \pan, pansSeq);
+	totalBind.play;
+
 	Synth(\wah, [\freq, activeFundamental * 3]);
 }, '/keyComplete');
 
@@ -516,7 +548,7 @@ b.sendMsg("/freeAllSynths");
 
 (
 b = NetAddr.new("127.0.0.1", 57120);
-b.sendMsg("/playInitialStoneSelectStage1", 4);
+b.sendMsg("/keyComplete", 0);
 )
 
 // PLAY NOTE

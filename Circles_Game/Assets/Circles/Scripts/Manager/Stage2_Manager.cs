@@ -119,6 +119,9 @@ public class Stage2_Manager : MonoBehaviour
             focusOnPartialsTrackingBuffer[i] = false;
         }
 
+        // Reset other stuff
+        focusOnPartialsCountdown_t = -1;
+
         // Reset stones
         foreach(Stone s in noiseGameManager.stonePlacer.stoneScripts){
             s.DisableGlowState();

@@ -31,7 +31,7 @@ public class Stone : MonoBehaviour
         UpdateColor();
 
         // DEBUG
-        EnableGlowState();
+        // EnableGlowState();
     }
 
     public void ResetForNewGameState(int newGameState){

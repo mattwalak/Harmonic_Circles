@@ -5,6 +5,7 @@ function Player2_Stage2(){
 
     let requiredCirclesBuffer = [];
     let activatedCirclesBuffer = [];
+    let completedKeysBuffer = [];
 
     let doneReceivingFocusedPartials = false;
 
@@ -48,9 +49,14 @@ function Player2_Stage2(){
 		}
 
         // Reset buffers
-        for(var i = 0; i < NUM_CIRCLES; i++){
+        for(let i = 0; i < NUM_CIRCLES; i++){
             requiredCirclesBuffer.push(false);
             activatedCirclesBuffer.push(false);
+        }
+
+        // Key buffer - Resets once per level
+        for(let i = 0; i < NUM_KEYS; i++){
+            completedKeysBuffer.push(false);
         }
 
 		keyButtons[0].isPressedIn = true;
@@ -92,9 +98,13 @@ function Player2_Stage2(){
         networkSend_CircleButtonClick(id, 1);
 
         if(keyPassed){
-            // NETWORK  - key passed
-            keyButtons[currentKey].setIsActive(true);
-            networkSend_KeyComplete(currentKey);
+            if(!completedKeysBuffer[currentKey]){
+                completedKeysBuffer[currentKey] = true;
+
+                // NETWORK  - key passed
+                keyButtons[currentKey].setIsActive(true);
+                networkSend_KeyComplete(currentKey);
+            }
         }
     }
 
