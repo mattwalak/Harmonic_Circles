@@ -17,7 +17,7 @@ public class Stage1_Manager : MonoBehaviour
 
     public void ExitStage(){
         foreach(Stone s in noiseGameManager.stonePlacer.stoneScripts){
-            s.ResetForNewGameState(1);
+            s.ResetForNewGameState(2);
         }
 
         stageIsActive = false;
@@ -28,6 +28,11 @@ public class Stage1_Manager : MonoBehaviour
             noiseGameManager.stonePlacer.stoneScripts[msg.circleButtonID].DisableGlowState();
         }else{
             noiseGameManager.stonePlacer.stoneScripts[msg.circleButtonID].EnableGlowState();
+            
+            OscMessage oscMessage = new OscMessage();
+            oscMessage.address = "/playInitialStoneSelectStage1";
+            oscMessage.values.Add(msg.circleButtonID);
+            noiseGameManager.SendOscMessage(oscMessage);
         }
     }
 
@@ -58,7 +63,4 @@ public class Stage1_Manager : MonoBehaviour
             }
         }
     }
-
-
-
 }

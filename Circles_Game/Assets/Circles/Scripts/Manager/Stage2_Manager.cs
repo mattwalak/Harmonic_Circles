@@ -61,11 +61,15 @@ public class Stage2_Manager : MonoBehaviour
             if(focusOnPartialsCountdown_t > 0){
                 focusOnPartialsCountdown_t -= Time.deltaTime;
                 if(focusOnPartialsCountdown_t <= 0){
-                    // NETWORK - Send end of focusOnPartials signal
-                    NetworkMessage msg = new NetworkMessage();
-                    msg.source = "Game";
-                    msg.command = "EndOfFocusOnPartial";
-                    noiseGameManager.SendNetworkMessage(msg);
+                    // This last check makes sure we don't send an EndOfFocusOnPartial message
+                    // when a keychange has cancled the end of it
+                    if(sourceEmitsParticles){
+                        // NETWORK - Send end of focusOnPartials signal
+                        NetworkMessage msg = new NetworkMessage();
+                        msg.source = "Game";
+                        msg.command = "EndOfFocusOnPartial";
+                        noiseGameManager.SendNetworkMessage(msg);
+                    } 
                 }
             }
 
@@ -165,6 +169,10 @@ public class Stage2_Manager : MonoBehaviour
             noiseGameManager.SendNetworkMessage(msgOut);
 
             noiseGameManager.NextScene();
+        }else{
+            OscMessage oscMessage = new OscMessage();
+            oscMessage.address = "/keyComplete";
+            noiseGameManager.SendOscMessage(oscMessage);
         }
     }
 

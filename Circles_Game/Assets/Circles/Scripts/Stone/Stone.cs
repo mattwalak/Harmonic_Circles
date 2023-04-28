@@ -77,10 +77,10 @@ public class Stone : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collisionInfo)
     {
-        if(gameManager.gameState == 2){
-            AirParticle particle = collisionInfo.gameObject.GetComponent<AirParticle>();
-            gameManager.RegisterGenericStoneHit(stoneNum, particle.t);
-        }
+        // This exists so we can call the code that will trigger the scene change
+        // after we update the color, that way the scene does not change first leaving
+        // a single colored stone in the new scene
+        bool firstGlowHitRegistered = false;
 
         if(isInGlowState){
             if(gameManager.gameState == 1){
@@ -102,7 +102,7 @@ public class Stone : MonoBehaviour
             // Send networked glow hit only if in gamemode 1
             if(numGlowHits == 0 && gameManager.gameState == 1){
                 // First glow hit
-                gameManager.RegisterNewActivatedStone();
+                firstGlowHitRegistered = true;
                 NetworkMessage netMsgObj = new NetworkMessage();
                 netMsgObj.circleButtonID = stoneNum;
                 netMsgObj.circleButtonState = 2;
@@ -131,6 +131,16 @@ public class Stone : MonoBehaviour
             msg.values.Add(stoneNum);
             msg.values.Add(collisionInfo.gameObject.GetComponent<AirParticle>().GetGain());
             osc.Send(msg);
+        }
+
+        // These things could trigger scene changes, so they are here
+        if(firstGlowHitRegistered){
+            gameManager.RegisterNewActivatedStone();
+        }
+
+        if(gameManager.gameState == 2){
+            AirParticle particle = collisionInfo.gameObject.GetComponent<AirParticle>();
+            gameManager.RegisterGenericStoneHit(stoneNum, particle.t);
         }
     }
 }

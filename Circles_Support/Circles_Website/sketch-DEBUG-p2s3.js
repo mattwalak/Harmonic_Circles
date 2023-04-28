@@ -24,6 +24,7 @@
 	let MAIN_RING_DIAMETER = 0;
 	let SMALLER_RING_DIAMETER = 0;
 	let markerDotSize;
+	let centerMarginFrac = 0.25; // NOTE: Radius, not diameter
 
     function setup(){
 		createCanvas(windowWidth, windowHeight);
@@ -31,13 +32,18 @@
 
         sourceScale = width/10;
         angleMode(DEGREES);
-		sourcePos = createVector(width/2, height/2);
-		normSourcePos = createVector(0, 0);
+		sourcePos = createVector(width/2, (height/2) - (MAIN_RING_DIAMETER/2));
+		normSourcePos = createVector(0, 1);
 		polarReferenceDir = createVector(0, -1);
+		
 
 		MAIN_RING_DIAMETER = width * 5/6;
 		SMALLER_RING_DIAMETER = width * 1/2;
 		markerDotSize = width / 20;
+
+		sourceDegree = 0;
+		sourceMagnitude = 1;
+		calculateAndSetCartesianFromPolar();
     }
 
     function draw(){
@@ -89,8 +95,16 @@
 
 		circle(width/2, height/2, MAIN_RING_DIAMETER);
 
+		fill(0);
+		let centerDiameter = centerMarginFrac * MAIN_RING_DIAMETER;
+		circle(width/2, height/2, centerDiameter);
+
 		fill(160, 160, 160);
-		circle(width/2, height/2, markerDotSize);
+		circle((width/2) + (centerDiameter / 2), height/2, markerDotSize);
+		circle((width/2) - (centerDiameter / 2), height/2, markerDotSize);
+		circle(width/2, (height/2) + (centerDiameter / 2), markerDotSize);
+		circle(width/2, (height/2) - (centerDiameter / 2), markerDotSize);
+
 		circle((width/2) + (MAIN_RING_DIAMETER/2), height/2, markerDotSize);
 		circle((width/2) - (MAIN_RING_DIAMETER/2), height/2, markerDotSize);
 		circle(width/2, (height/2) + (MAIN_RING_DIAMETER/2), markerDotSize);
@@ -143,9 +157,10 @@
 
         let dist = Math.sqrt(Math.pow(normSourcePos.x, 2) + Math.pow(normSourcePos.y, 2));
         if(dist > 1){
-            normSourcePos.x = normSourcePos.x * 1 / dist;
-            normSourcePos.y = normSourcePos.y * 1 / dist;
-        }
+            normSourcePos.setMag(1);
+        }else if(dist < centerMarginFrac){
+			normSourcePos.setMag(centerMarginFrac);
+		}
 
         sourcePos.x = (width / 2) + (normSourcePos.x * (MAIN_RING_DIAMETER / 2));
         sourcePos.y = (height / 2) + (normSourcePos.y * (MAIN_RING_DIAMETER / 2));
@@ -186,11 +201,11 @@
 		isDegreeInterping = true;
 
 		// Magnitude interp
-		if(sourceMagnitude > 0.5){
+		if(sourceMagnitude > 1 - ((1 - centerMarginFrac)/2)){
 			magnitudeInterpGoal = 1;
 			magnitudeInterpDirection = 1;
 		}else{
-			magnitudeInterpGoal = 0;
+			magnitudeInterpGoal = centerMarginFrac;
 			magnitudeInterpDirection = -1;
 		}
 

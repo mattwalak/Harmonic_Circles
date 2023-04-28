@@ -57,6 +57,10 @@ function Player2_Stage2(){
     }
 
     this.draw = function(){
+        colorMode(HSB, 1);
+        background(230/360, 1, 0.4);
+        colorMode(RGB, 255);
+
         for(let i = 0; i < circleSelectorButtons.length; i++){
             circleSelectorButtons[i].draw();
         }
@@ -119,6 +123,7 @@ function Player2_Stage2(){
                 activatedCirclesBuffer[i] = false;
             }
 
+            doneReceivingFocusedPartials = false;
         }
 
 

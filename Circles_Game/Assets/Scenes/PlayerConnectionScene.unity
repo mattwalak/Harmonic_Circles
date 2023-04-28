@@ -1079,8 +1079,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPlayerConnectionScene: 1
   isNoiseGameScene: 0
-  log: {fileID: 0}
-  gameManager: {fileID: 0}
   playerConnectionManager: {fileID: 78676604}
   noiseGameManager: {fileID: 0}
 --- !u!4 &1092610250

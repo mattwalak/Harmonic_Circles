@@ -12,7 +12,7 @@ let playerNum = -1;
 let gameState = 0;
 
 let NUM_CIRCLES = 20;
-var NUM_KEYS = 1;
+var NUM_KEYS = 6;
 let MAIN_RING_DIAMETER;
 let SMALLER_RING_DIAMETER;
 let font;
@@ -42,7 +42,6 @@ function setup(){
 }
 
 function draw(){
-	background(0);
 	if(gameState == 0){
 		playerConnectionStage.draw();
 	}else{

@@ -23,14 +23,23 @@ function Player2_Stage3(){
 	let degreeInterpDirection = -1; // Negative is decreasing, positive is increasing
 
     let markerDotSize;
+    let centerMarginFrac = 0.25; // NOTE: Radius, not diameter
 
     this.setup = function(){
         sourceScale = width/10;
         angleMode(DEGREES);
         markerDotSize = width / 20;
+
+        sourceDegree = 0;
+		sourceMagnitude = 1;
+		this.calculateAndSetCartesianFromPolar();
     }
 
     this.draw = function(){
+        colorMode(HSB, 1);
+        background(280/360, 1, 0.4);
+        colorMode(RGB, 255);
+
         // Update snap stuff
 		let coordinateUpdateScheduled = (isDegreeInterping || isMagnitudeInterping);
 
@@ -74,14 +83,22 @@ function Player2_Stage3(){
 			this.calculateAndSetCartesianFromPolar();
             this.sendSourcePosition();
 		}
-
-		background(0);
+        
         fill(255);
-
 		circle(width/2, height/2, MAIN_RING_DIAMETER);
 
+		colorMode(HSB, 1);
+        fill(280/360, 1, 0.4);
+		let centerDiameter = centerMarginFrac * MAIN_RING_DIAMETER;
+		circle(width/2, height/2, centerDiameter);
+        colorMode(RGB, 255);
+        
 		fill(160, 160, 160);
-		circle(width/2, height/2, markerDotSize);
+		circle((width/2) + (centerDiameter / 2), height/2, markerDotSize);
+		circle((width/2) - (centerDiameter / 2), height/2, markerDotSize);
+		circle(width/2, (height/2) + (centerDiameter / 2), markerDotSize);
+		circle(width/2, (height/2) - (centerDiameter / 2), markerDotSize);
+
 		circle((width/2) + (MAIN_RING_DIAMETER/2), height/2, markerDotSize);
 		circle((width/2) - (MAIN_RING_DIAMETER/2), height/2, markerDotSize);
 		circle(width/2, (height/2) + (MAIN_RING_DIAMETER/2), markerDotSize);
@@ -117,8 +134,9 @@ function Player2_Stage3(){
 		sourcePos.y = sourcePos.y + (height/2);
     }
 
+    // Polar coordinates must be calculated!
     this.sendSourcePosition = function(){
-        networkSend_TouchPositionData(1, normSourcePos.x, -normSourcePos.y, 2);
+        networkSend_TouchPositionData(1, sourceDegree, (sourceMagnitude - centerMarginFrac) / (1 - centerMarginFrac), 2);
     }
 
     this.generalTouchFunction = function(){
@@ -127,13 +145,15 @@ function Player2_Stage3(){
 
         let dist = Math.sqrt(Math.pow(normSourcePos.x, 2) + Math.pow(normSourcePos.y, 2));
         if(dist > 1){
-            normSourcePos.x = normSourcePos.x * 1 / dist;
-            normSourcePos.y = normSourcePos.y * 1 / dist;
-        }
+            normSourcePos.setMag(1);
+        }else if(dist < centerMarginFrac){
+			normSourcePos.setMag(centerMarginFrac);
+		}
 
         sourcePos.x = (width / 2) + (normSourcePos.x * (MAIN_RING_DIAMETER / 2));
         sourcePos.y = (height / 2) + (normSourcePos.y * (MAIN_RING_DIAMETER / 2));
 
+        this.calculateAndSetPolarFromCartesian();
         this.sendSourcePosition();
     }
 
@@ -170,11 +190,11 @@ function Player2_Stage3(){
 		isDegreeInterping = true;
 
 		// Magnitude interp
-		if(sourceMagnitude > 0.5){
+		if(sourceMagnitude > 1 - ((1 - centerMarginFrac)/2)){
 			magnitudeInterpGoal = 1;
 			magnitudeInterpDirection = 1;
 		}else{
-			magnitudeInterpGoal = 0;
+			magnitudeInterpGoal = centerMarginFrac;
 			magnitudeInterpDirection = -1;
 		}
 

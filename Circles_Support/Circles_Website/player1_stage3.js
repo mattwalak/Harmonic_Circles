@@ -18,8 +18,11 @@ function Player1_Stage3(){
     }
 
     this.draw = function(){
-        fill(255);
+        colorMode(HSB, 1);
+        background(280/360, 1, 0.4);
+        colorMode(RGB, 255);
 
+        fill(255);
 		circle(width/2, height/2, MAIN_RING_DIAMETER);
 
         fill(0, 255, 0);
@@ -31,7 +34,7 @@ function Player1_Stage3(){
     }
 
     this.calculateAndSetCartesianFromRadial = function(){
-        
+
     }
 
     this.sendTouchPosition = function(){

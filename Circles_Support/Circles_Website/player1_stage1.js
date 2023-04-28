@@ -9,15 +9,20 @@ function Player1_Stage1(){
     }
 
     this.draw = function(){
+        colorMode(HSB, 1);
+        background(180/360, 1, 0.4);
+        colorMode(RGB, 255);
+        
         fill(255);
 		circle(width/2, height/2, MAIN_RING_DIAMETER);
-
+        
 		circle_interp = (millis() - lastClickActionTime) / lastClickDelayLength;
   		circle_interp = constrain(circle_interp, 0, 1);
-  
+        
   		fill(255, 127, 127);
   		noStroke();
-		if(circle_interp > 0 && circle_interp < 1){
+		
+        if(circle_interp > 0 && circle_interp < 1){
 			arc(width/2, height/2, 
                 MAIN_RING_DIAMETER, MAIN_RING_DIAMETER, 
 				-PI/2, -PI/2 + (2*PI*circle_interp));

@@ -8,6 +8,10 @@ function Player1_Stage2(){
     }
 
     this.draw = function(){
+        colorMode(HSB, 1);
+        background(230/360, 1, 0.4);
+        colorMode(RGB, 255);
+
         if(sourceIsMobile){
             fill(255);
         }else{

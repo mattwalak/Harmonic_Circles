@@ -38,6 +38,21 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: BackCover
+    uniqueID: 1405689635
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Game
+    uniqueID: 296410183
+    locked: 0
+  - name: Cover
+    uniqueID: 3133670565
+    locked: 0
+  - name: Lasers
+    uniqueID: 3978845787
+    locked: 0
+  - name: FrontFrontCover
+    uniqueID: 1284668915
     locked: 0

@@ -20,6 +20,10 @@ function Player2_Stage1(){
     }
 
     this.draw = function(){
+        colorMode(HSB, 1);
+        background(180/360, 1, 0.4);
+        colorMode(RGB, 255);
+        
         for(let i = 0; i < circleSelectorButtons.length; i++){
             circleSelectorButtons[i].draw();
         }

@@ -11,7 +11,7 @@ public class NoiseGameManager : MonoBehaviour
     public Stage3_Manager stage3Manager;
     
     public int NUM_CIRCLES = 20;
-    public int NUM_KEYS = 1;
+    public int NUM_KEYS = 6;
 
     public TMP_Text progressTextCounter;
 
@@ -19,6 +19,9 @@ public class NoiseGameManager : MonoBehaviour
     public GameObject laserCollection;
     public StonePlacer stonePlacer;
     public CircleBounds circleBounds;
+    public Cover frontFrontCover;
+    public Cover frontCover;
+    public Cover backCover;
 
     public GameObject airParticlePrefab;
 
@@ -38,7 +41,7 @@ public class NoiseGameManager : MonoBehaviour
     void Start(){
         mainCamera = Camera.main;
 
-        netManager = (NetworkManager) FindObjectOfType(typeof(NetworkManager));
+        netManager = (NetworkManager)FindObjectOfType(typeof(NetworkManager));
         if(netManager != null){
             netManager.LoadNoiseGameScene();
         }
@@ -71,19 +74,27 @@ public class NoiseGameManager : MonoBehaviour
         int nextGameStageTemp = gameState + 1;
         if(nextGameStageTemp == 1){
             stage1Manager.EnterStage();
+            backCover.SetColor(Color.HSVToRGB(180.0f/360.0f, 1.0f, 0.4f));
         }else if(nextGameStageTemp == 2){
             stage1Manager.ExitStage();
             stage2Manager.EnterStage();
+            backCover.SetColor(Color.HSVToRGB(230.0f/360.0f, 1.0f, 0.4f));
         }else if(nextGameStageTemp == 3){
             stage2Manager.ExitStage();
             stage3Manager.EnterStage();
+            backCover.SetColor(Color.HSVToRGB(280.0f/360.0f, 1.0f, 0.4f));
         }
 
         gameState = nextGameStageTemp;
     }
 
     public void UpdateProgressCounter(int newNumber){
-        progressTextCounter.text = newNumber.ToString();
+        if(newNumber >= 0){
+            progressTextCounter.text = newNumber.ToString();
+        }else{
+            progressTextCounter.text = "";
+        }
+        
     }
 
     public void SendOscMessage(OscMessage msg){
@@ -96,16 +107,7 @@ public class NoiseGameManager : MonoBehaviour
 
 
     void Update(){
-        /*
-            // Laser mode
-            if(Input.GetMouseButton(0)){
-                Vector2 mousePos = Input.mousePosition;
-                Vector2 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
-                ballSourcePosition = worldPos;
-            }
 
-            laserCollection.transform.position = ballSourcePosition;
-        */
     }
 
     public void RegisterNewActivatedStone(){
